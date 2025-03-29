@@ -1,0 +1,25 @@
+- https://jod35.github.io/fastapi-beyond-crud-docs/site/chapter5/
+- https://github.com/zhanymkanov/fastapi-best-practices
+- 
+- gunicorn -w 4 -k uvicorn.workers.UvicornWorker src.main:app --bind 0.0.0.0:8000
+- uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+- gunicorn -w $(python3 -c "import multiprocessing; print((multiprocessing.cpu_count() * 2) + 1)") -k uvicorn.workers.UvicornWorker --preload src.main:app --bind 0.0.0.0:8000
+  -  Nếu server có 4 CPU core, số worker tự động thành (2 × 4) + 1 = 9.
+- Kiểm tra container:
+  - docker-compose -f docker-compose.yml ps
+- Dừng container:
+  - docker-compose -f docker-compose.yml down
+- Xem logs:
+  - docker-compose -f docker-compose.yml logs -f
+- docker volume ls
+- docker volume rm <tên_volume>
+-
+- https://testdriven.io/blog/fastapi-sqlmodel/
+- alembic revision --autogenerate -m "create users table"\
+- alembic upgrade head
+- Rollback về migration trước đó
+  - alembic downgrade -1
+-
+- ruff check
+- ruff check src/books/service.py --select I --fix
+- ruff check --select I
