@@ -1,8 +1,8 @@
+import uuid
 from datetime import datetime
 
-from sqlmodel import SQLModel, Field, Column
 import sqlalchemy.dialects.postgresql as pg
-import uuid
+from sqlmodel import Column, Field, SQLModel
 
 
 class User(SQLModel, table=True):

@@ -1,6 +1,7 @@
 import uuid
 from datetime import date, datetime
-from sqlmodel import SQLModel, Field, Column, TIMESTAMP
+
+from sqlmodel import TIMESTAMP, Column, Field, SQLModel
 
 
 class Book(SQLModel, table=True):
