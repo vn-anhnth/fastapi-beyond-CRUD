@@ -26,6 +26,7 @@ class User(SQLModel, table=True):
     email: str
     password_hash: str
     created_at: datetime = Field(sa_column=Column(pg.TIMESTAMP, default=datetime.utcnow))
+    updated_at: datetime = Field(sa_column=Column(pg.TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow))
 
     def __repr__(self) -> str:
         return f'<User {self.username}>'

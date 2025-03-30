@@ -1,6 +1,7 @@
 - https://jod35.github.io/fastapi-beyond-crud-docs/site/chapter5/
 - https://github.com/zhanymkanov/fastapi-best-practices
-- 
+- https://github.com/teamhide/fastapi-boilerplate/tree/master
+-
 - gunicorn -w 4 -k uvicorn.workers.UvicornWorker src.main:app --bind 0.0.0.0:8000
 - uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
 - gunicorn -w $(python3 -c "import multiprocessing; print((multiprocessing.cpu_count() * 2) + 1)") -k uvicorn.workers.UvicornWorker --preload src.main:app --bind 0.0.0.0:8000
@@ -15,7 +16,7 @@
 - docker volume rm <tên_volume>
 -
 - https://testdriven.io/blog/fastapi-sqlmodel/
-- alembic revision --autogenerate -m "create users table"\
+- alembic revision --autogenerate -m "create users table"
 - alembic upgrade head
 - Rollback về migration trước đó
   - alembic downgrade -1

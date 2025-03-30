@@ -22,29 +22,30 @@ class BookService:
         new_book = Book(**book_data_dict)
         # new_book.published_date = datetime.strptime(book_data_dict['published_date'], '%Y-%m-%d')
 
-        async with session.begin():
-            session.add(new_book)
+        session.add(new_book)
+        await session.commit()
 
         return new_book
 
     async def update_book_by_uid(self, book_uid: str, update_data: BookUpdateModel, session: AsyncSession):
-        async with session.begin():
-            book_to_update = await self.get_book_by_uid(book_uid, session)
-            if not book_to_update:
-                return None
+        book_to_update = await self.get_book_by_uid(book_uid, session)
+        if not book_to_update:
+            return None
 
-            update_data_dict = update_data.model_dump()
-            for k, v in update_data_dict.items():
-                setattr(book_to_update, k, v)
+        update_data_dict = update_data.model_dump()
+        for k, v in update_data_dict.items():
+            setattr(book_to_update, k, v)
+
+        await session.commit()
 
         return book_to_update
 
     async def delete_book_by_uid(self, book_uid: str, session: AsyncSession):
-        async with session.begin():
-            book_to_delete = await self.get_book_by_uid(book_uid, session)
-            if not book_to_delete:
-                return None
+        book_to_delete = await self.get_book_by_uid(book_uid, session)
+        if not book_to_delete:
+            return None
 
-            await session.delete(book_to_delete)
+        await session.delete(book_to_delete)
+        await session.commit()
 
         return True

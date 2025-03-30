@@ -4,7 +4,7 @@ from datetime import date
 from pydantic import BaseModel
 
 
-class Book(BaseModel):
+class BookModel(BaseModel):
     uid: uuid.UUID
     title: str
     author: str
