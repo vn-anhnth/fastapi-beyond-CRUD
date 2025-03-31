@@ -1,12 +1,17 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 from starlette.responses import JSONResponse
+
+from src.auth.dependencies import AccessTokenBearer, RefreshTokenBearer
+from src.redis import add_jit_to_blocklist
 
 from ..database import get_session
 from .schemas import UserCreateModel, UserLoginModel, UserModel
 from .service import UserService
 from .utils import create_access_token, verify_password
+
+REFRESH_TOKEN_EXPIRY = 2
 
 auth_router = APIRouter()
 user_service = UserService()
@@ -20,9 +25,6 @@ async def create_user(user_data: UserCreateModel, session: AsyncSession=Depends(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail='User with this email already exists.')
     return new_user
-
-
-REFRESH_TOKEN_EXPIRY = 2
 
 
 @auth_router.post('/signin')
@@ -51,5 +53,38 @@ async def login_user(login_data: UserLoginModel, session: AsyncSession=Depends(g
             'access_token': access_token,
             'refresh_token': refresh_token,
             'user': {'email': user.email, 'uid': str(user.uid)},
+        }
+    )
+
+
+@auth_router.post('/refresh_token')
+async def get_new_access_token(
+    token_data: dict = Depends(RefreshTokenBearer())
+):
+    expiry_timestamp = token_data['exp']
+
+    if datetime.fromtimestamp(expiry_timestamp) < datetime.now():
+        new_access_token = create_access_token(user_data=token_data['user'])
+        return JSONResponse(
+            content={
+                'message': 'New access token created.',
+                'access_token': new_access_token,
+            }
+        )
+
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                        detail='Invalid or expired token.')
+
+
+
+@auth_router.get('/logout')
+async def revoke_token(
+    token_data: dict = Depends(AccessTokenBearer())
+):
+    await add_jit_to_blocklist(token_data['jit'])
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            'message': 'You are now logged out!',
         }
     )

@@ -7,7 +7,7 @@ from passlib.context import CryptContext
 
 from src.config import Config
 
-passwd_context = CryptContext (
+passwd_context = CryptContext(
     schemes=['bcrypt'],
 )
 
@@ -41,6 +41,7 @@ def decode_token(token: str) -> dict|None:
     try:
         token_data = jwt.decode(
             jwt=token,
+            key=Config.JWT_KEY,
             algorithms=[Config.JWT_ALGORITHM],
         )
     except jwt.PyJWTError as jwt_ex:

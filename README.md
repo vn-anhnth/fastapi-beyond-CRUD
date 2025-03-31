@@ -24,3 +24,10 @@
 - ruff check
 - ruff check src/books/service.py --select I --fix
 - ruff check --select I
+-
+- Kiểm tra container đang sử dụng volume
+  - docker ps -a --filter volume=fastapi-beyond-crud_postgres_data
+- docker rm -f 6a6e9420d7dc
+- docker volume rm fastapi-beyond-crud_postgres_data
+- Xóa container & volume
+  - docker compose down -v
