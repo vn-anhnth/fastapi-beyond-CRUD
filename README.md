@@ -1,6 +1,7 @@
 - https://jod35.github.io/fastapi-beyond-crud-docs/site/chapter5/
 - https://github.com/zhanymkanov/fastapi-best-practices
 - https://github.com/teamhide/fastapi-boilerplate/tree/master
+- Log: https://gist.github.com/liviaerxin/d320e33cbcddcc5df76dd92948e5be3b
 -
 - gunicorn -w 4 -k uvicorn.workers.UvicornWorker src.main:app --bind 0.0.0.0:8000
 - uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload

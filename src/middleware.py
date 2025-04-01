@@ -6,8 +6,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
-logger = logging.getLogger('uvicorn.access')
-# If disabled, print() can be used instead of stdout
+# logger = logging.getLogger('uvicorn.access')
 # logger.disabled = True
 
 
@@ -16,12 +15,11 @@ def register_middleware(app: FastAPI) -> None:
     async def custom_logging_middleware(request: Request, call_next) -> Response:
         start_time = time.time()
         response = await call_next(request)
-        proccesing_time = time.time() - start_time
+        processing_time = time.time() - start_time
 
-        message = f'... completed after {proccesing_time}s'
+        message = f'✅ Completed in {processing_time:.2f}s'
         print(message)
-        # sys.stdout.write(message + '\n')
-        # sys.stdout.flush()
+        sys.stdout.flush()
 
         return response
 

@@ -1,3 +1,5 @@
+import logging
+import sys
 from typing import List
 
 from fastapi import APIRouter, status
@@ -14,10 +16,14 @@ book_service = BookService()
 access_token_bearer = AccessTokenBearer()
 
 
-@book_router.get('/', response_model=List[BookModel], dependencies=[Depends(access_token_bearer)])
+logger = logging.getLogger(__name__)
+
+
+@book_router.get('/', response_model=List[BookModel], )
 async def get_all_books(
     session: AsyncSession=Depends(get_session),
 ) -> List[BookModel]:
+    logger.info('List all books.')
     books = await book_service.get_all_books(session)
     return books
 
