@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 from starlette.responses import JSONResponse
 
-from src.auth.dependencies import AccessTokenBearer, RefreshTokenBearer
+from src.auth.dependencies import AccessTokenBearer, RefreshTokenBearer, RoleChecker, get_current_user
+from src.auth.models import User
 from src.redis import add_jit_to_blocklist
 
 from ..database import get_session
@@ -16,6 +17,7 @@ REFRESH_TOKEN_EXPIRY = 2
 
 auth_router = APIRouter()
 user_service = UserService()
+role_checker = RoleChecker(allowed_roles=['admin', 'user'])
 
 
 @auth_router.post('/signup', status_code=status.HTTP_201_CREATED, response_model=UserModel)
@@ -89,3 +91,10 @@ async def revoke_token(
             'message': 'You are now logged out!',
         }
     )
+
+
+@auth_router.get('/me', dependencies=[Depends(role_checker)])
+async def get_current_user(
+    current_user: User = Depends(get_current_user)
+) -> UserModel:
+    return current_user

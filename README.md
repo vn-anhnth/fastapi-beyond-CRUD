@@ -20,6 +20,8 @@
 - alembic upgrade head
 - Rollback về migration trước đó
   - alembic downgrade -1
+- Khi bạn chạy docker-compose up, Docker Compose sẽ load các biến môi trường này vào môi trường shell của bạn, do đó bên phải set lại DATABASE_URL với localhost
+  - DATABASE_URL=postgresql+asyncpg://bookly_user:bookly_password@localhost:5432/bookly_db alembic revision --autogenerate -m "add role to users table"
 -
 - ruff check
 - ruff check src/books/service.py --select I --fix
@@ -31,3 +33,6 @@
 - docker volume rm fastapi-beyond-crud_postgres_data
 - Xóa container & volume
   - docker compose down -v
+-
+- Note
+  - exec() nó mở transaction mà tự động đóng

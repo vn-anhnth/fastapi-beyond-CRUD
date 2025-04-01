@@ -14,10 +14,9 @@ book_service = BookService()
 access_token_bearer = AccessTokenBearer()
 
 
-@book_router.get('/', response_model=List[BookModel])
+@book_router.get('/', response_model=List[BookModel], dependencies=[Depends(access_token_bearer)])
 async def get_all_books(
     session: AsyncSession=Depends(get_session),
-    token_details: str = Depends(access_token_bearer)
 ) -> List[BookModel]:
     books = await book_service.get_all_books(session)
     return books
