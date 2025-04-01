@@ -13,7 +13,7 @@ class UserAlreadyExists(Exception):
 class UserService:
     UserAlreadyExists = UserAlreadyExists
 
-    async def get_user_by_email(self, email: str, session: AsyncSession):
+    async def get_user_by_email(self, email: str, session: AsyncSession) -> User | None:
         print(f"Before query - Session in transaction: {session.in_transaction()}")
         statement = select(User).where(User.email == email)
         result = await session.exec(statement)
@@ -25,7 +25,7 @@ class UserService:
         user = await self.get_user_by_email(email, session)
         return user is not None
 
-    async def create_user(self, user_data: UserCreateModel, session: AsyncSession):
+    async def create_user(self, user_data: UserCreateModel, session: AsyncSession) -> User:
         async with session.begin():
             if await self.user_exists(user_data.email, session):
                 raise UserAlreadyExists

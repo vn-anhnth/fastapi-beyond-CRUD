@@ -20,7 +20,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return passwd_context.verify(plain_password, hashed_password)
 
 
-def create_access_token(user_data: dict, expiry: timedelta=None, refresh=False) -> str:
+def create_access_token(user_data: dict, expiry: timedelta=None, refresh: bool=False) -> str:
     payload = {
         'user': user_data,
         'exp': datetime.utcnow() + (expiry if expiry is not None else timedelta(minutes=60)),

@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 from starlette.responses import JSONResponse
@@ -28,7 +29,7 @@ async def create_user(user_data: UserCreateModel, session: AsyncSession=Depends(
 
 
 @auth_router.post('/signin')
-async def login_user(login_data: UserLoginModel, session: AsyncSession=Depends(get_session)):
+async def login_user(login_data: UserLoginModel, session: AsyncSession=Depends(get_session)) -> JSONResponse:
     email = login_data.email
     password = login_data.password
 
@@ -60,7 +61,7 @@ async def login_user(login_data: UserLoginModel, session: AsyncSession=Depends(g
 @auth_router.post('/refresh_token')
 async def get_new_access_token(
     token_data: dict = Depends(RefreshTokenBearer())
-):
+) -> JSONResponse:
     expiry_timestamp = token_data['exp']
 
     if datetime.fromtimestamp(expiry_timestamp) < datetime.now():
@@ -80,7 +81,7 @@ async def get_new_access_token(
 @auth_router.get('/logout')
 async def revoke_token(
     token_data: dict = Depends(AccessTokenBearer())
-):
+) -> JSONResponse:
     await add_jit_to_blocklist(token_data['jit'])
     return JSONResponse(
         status_code=status.HTTP_200_OK,

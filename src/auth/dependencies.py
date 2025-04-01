@@ -1,12 +1,12 @@
 from fastapi import HTTPException, Request, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.security import HTTPBearer
 
 from src.auth.utils import decode_token
 from src.redis import is_jit_in_blocklist
 
 
 class TokenBearer(HTTPBearer):
-    def __init__(self, auto_error: bool = True):
+    def __init__(self, auto_error: bool = True) -> None:
         super().__init__(auto_error=auto_error)
 
     async def __call__(self, request: Request) -> dict | None:
