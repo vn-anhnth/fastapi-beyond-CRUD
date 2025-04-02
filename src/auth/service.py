@@ -10,8 +10,13 @@ class UserAlreadyExists(Exception):
     pass
 
 
+class UserNotFound(Exception):
+    pass
+
+
 class UserService:
     UserAlreadyExists = UserAlreadyExists
+    UserNotFound = UserNotFound
 
     async def get_user_by_email(self, email: str, session: AsyncSession) -> User | None:
         print(f"Before query - Session in transaction: {session.in_transaction()}")
@@ -35,3 +40,15 @@ class UserService:
             new_user.password_hash = generate_password_hash(user_data_dict['password'])
             session.add(new_user)
         return new_user
+
+    async def update_user(self, user_email: str, user_data: dict, session: AsyncSession) -> User:
+        async with session.begin():
+            user = await self.get_user_by_email(user_email, session)
+            if not user:
+                raise UserNotFound
+
+            for k, v in user_data.items():
+                setattr(user, k, v)
+
+        return user
+
