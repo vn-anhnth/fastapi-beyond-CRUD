@@ -22,7 +22,7 @@ role_checker = RoleChecker(allowed_roles=['admin', 'user'])
 
 
 @auth_router.post('/signup', status_code=status.HTTP_201_CREATED, response_model=UserModel)
-async def create_user(user_data: UserCreateModel, session: AsyncSession=Depends(get_session)) -> JSONResponse:
+async def create_user(user_data: UserCreateModel, session: AsyncSession=Depends(get_session)) -> dict:
     try:
         new_user = await user_service.create_user(user_data, session)
     except user_service.UserAlreadyExists:
@@ -44,9 +44,8 @@ async def create_user(user_data: UserCreateModel, session: AsyncSession=Depends(
     }
 
 
-
 @auth_router.get('/verify_email')
-async def verify_email(token: str, session: AsyncSession=Depends(get_session)) -> JSONResponse:
+async def verify_email(token: str, session: AsyncSession=Depends(get_session)) -> dict:
     token_data = verify_url_safe_token(token)
     if not token_data:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Error occured during verification.')
@@ -60,6 +59,7 @@ async def verify_email(token: str, session: AsyncSession=Depends(get_session)) -
         'message': 'Email verified successfully!',
         'user': user
     }
+
 
 @auth_router.post('/signin')
 async def login_user(login_data: UserLoginModel, session: AsyncSession=Depends(get_session)) -> JSONResponse:
@@ -110,7 +110,6 @@ async def get_new_access_token(
                         detail='Invalid or expired token.')
 
 
-
 @auth_router.get('/logout')
 async def revoke_token(
     token_data: dict = Depends(AccessTokenBearer())
@@ -133,7 +132,7 @@ async def get_current_user(
 
 @auth_router.post('/send_mail')
 async def send_mail(emails: EmailModel) -> JSONResponse:
-    body ='<h1>Welcome to our app!</h1>'
+    body = '<h1>Welcome to our app!</h1>'
 
     send_email.delay(emails.addresses, 'Test Email', body)
 
