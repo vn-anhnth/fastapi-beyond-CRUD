@@ -35,6 +35,53 @@ services:
       retries: 5
       start_period: 5s
 
+  celery_worker:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: bookly_celery
+    restart: always
+    env_file:
+      - ../.env
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ../src:/app/src
+    command: celery -A src.celery_tasks worker --loglevel=info --hostname=worker1@%h
+
+  flower:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: bookly_flower
+    restart: always
+    ports:
+      - "5555:5555"
+    env_file:
+      - ../.env
+    depends_on:
+      redis:
+        condition: service_healthy
+      celery_worker:
+        condition: service_started
+    volumes:
+      # - ../src:/app/src
+      - flower_data:/app/flower
+    command: celery -A src.celery_tasks flower --broker=${REDIS_URL} --port=5555 --inspect_timeout=10000 --enable_events --worker_hostname=worker1@%h --persistent=True --db=/app/flower/flower.db --basic_auth=admin:admin --url_prefix=flower
+
+  migration:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: bookly_migration
+    env_file:
+      - ../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: alembic upgrade head
+
   api:
     build:
       context: ..
@@ -50,6 +97,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      migration:
+        condition: service_completed_successfully
     volumes:
       - ../src:/app/src
     command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload --log-config=src/log_conf.yml
@@ -57,3 +106,4 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  flower_data:

@@ -6,10 +6,11 @@ from starlette.responses import JSONResponse
 
 from src.auth.dependencies import AccessTokenBearer, RefreshTokenBearer, RoleChecker, get_current_user
 from src.auth.models import User
+from src.celery_tasks import send_email
 from src.redis import add_jit_to_blocklist
 
 from ..database import get_session
-from .schemas import UserCreateModel, UserLoginModel, UserModel
+from .schemas import EmailModel, UserCreateModel, UserLoginModel, UserModel
 from .service import UserService
 from .utils import create_access_token, verify_password
 
@@ -98,3 +99,12 @@ async def get_current_user(
     current_user: User = Depends(get_current_user)
 ) -> UserModel:
     return current_user
+
+
+@auth_router.post('/send_mail')
+async def send_mail(emails: EmailModel) -> JSONResponse:
+    body ='<h1>Welcome to our app!</h1>'
+
+    send_email.delay(emails.addresses, 'Test Email', body)
+
+    return {'message': 'Email sent successfully!'}
