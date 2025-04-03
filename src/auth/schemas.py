@@ -15,6 +15,8 @@ class UserModel(BaseModel):
     created_at: datetime
     updated_at: datetime
 
+    model_config = {'from_attributes': True}
+
 
 class UserCreateModel(BaseModel):
     first_name: str = Field(max_length=25)

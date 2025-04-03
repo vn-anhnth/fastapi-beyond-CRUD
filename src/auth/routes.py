@@ -8,6 +8,7 @@ from src.auth.dependencies import AccessTokenBearer, RefreshTokenBearer, RoleChe
 from src.auth.models import User
 from src.celery_tasks import send_email
 from src.redis import add_jit_to_blocklist
+from src.utils import ResponseModel
 
 from ..database import get_session
 from .schemas import EmailModel, UserCreateModel, UserLoginModel, UserModel
@@ -21,7 +22,7 @@ user_service = UserService()
 role_checker = RoleChecker(allowed_roles=['admin', 'user'])
 
 
-@auth_router.post('/signup', status_code=status.HTTP_201_CREATED, response_model=UserModel)
+@auth_router.post('/signup', status_code=status.HTTP_201_CREATED, response_model=ResponseModel)
 async def create_user(user_data: UserCreateModel, session: AsyncSession=Depends(get_session)) -> dict:
     try:
         new_user = await user_service.create_user(user_data, session)
@@ -34,18 +35,20 @@ async def create_user(user_data: UserCreateModel, session: AsyncSession=Depends(
     html =f'''
     <h1>Welcome to our app!</h1>
     <p>Please verify your email by clicking the link below:</p>
-    <a href="http://localhost:8000/auth/verify_email?token={token}">Verify Email</a>
+    <a href="http://localhost:8000/api/v1/auth/verify_email?token={token}">Verify Email</a>
     '''
 
     send_email.delay([new_user.email], 'Verify Email', html)
     return {
         'message': 'User created successfully! Please verify your email.',
-        'user': new_user
+        'data': {
+            'user': UserModel.model_validate(new_user)
+        }
     }
 
 
 @auth_router.get('/verify_email')
-async def verify_email(token: str, session: AsyncSession=Depends(get_session)) -> dict:
+async def verify_email(token: str, session: AsyncSession = Depends(get_session)) -> dict:
     token_data = verify_url_safe_token(token)
     if not token_data:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Error occured during verification.')
@@ -93,7 +96,7 @@ async def login_user(login_data: UserLoginModel, session: AsyncSession=Depends(g
 
 @auth_router.post('/refresh_token')
 async def get_new_access_token(
-    token_data: dict = Depends(RefreshTokenBearer())
+    token_data: dict = Depends(RefreshTokenBearer()),
 ) -> JSONResponse:
     expiry_timestamp = token_data['exp']
 

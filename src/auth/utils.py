@@ -65,7 +65,7 @@ def create_url_safe_token(data: dict) -> str:
     return token
 
 
-def verify_url_safe_token(token: str, max_age: int=1) -> dict|None:
+def verify_url_safe_token(token: str, max_age: int=60) -> dict|None:
     try:
         token_data = serializer.loads(token, max_age=max_age)
         return token_data
