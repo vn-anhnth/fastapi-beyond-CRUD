@@ -66,9 +66,23 @@ services:
       celery_worker:
         condition: service_started
     volumes:
-      # - ../src:/app/src
       - flower_data:/app/flower
-    command: celery -A src.celery_tasks flower --broker=${REDIS_URL} --port=5555 --inspect_timeout=10000 --enable_events --worker_hostname=worker1@%h --persistent=True --db=/app/flower/flower.db --basic_auth=admin:admin --url_prefix=flower
+    # Flower monitoring tool configuration:
+    # - Connects to Redis broker for task monitoring
+    # - Exposes web interface on port 5555
+    # - Enables real-time task events
+    # - Uses persistent storage for monitoring data
+    # - Secures web interface with basic auth
+    command: celery -A src.celery_tasks flower \
+        --broker=${REDIS_URL} \
+        --port=5555 \
+        --inspect_timeout=10000 \
+        --enable_events \
+        --worker_hostname=worker1@%h \
+        --persistent=True \
+        --db=/app/flower/flower.db \
+        --basic_auth=admin:admin \
+        --url_prefix=flower
 
   migration:
     build:
